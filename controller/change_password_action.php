@@ -2,7 +2,6 @@
 session_start();
 require_once '../model/db_connect.php';
 
-// Check if the user is logged in, if not then redirect to login page
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: ../view/php/login.php");
     exit;
@@ -13,14 +12,12 @@ $oldPasswordError = $newPasswordError = $confirmPasswordError = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // Validate old password
     if (empty(trim($_POST["oldPassword"]))) {
         $oldPasswordError = "Old password is required.";
     } else {
         $oldPassword = trim($_POST["oldPassword"]);
     }
 
-    // Validate new password
     if (empty(trim($_POST["newPassword"]))) {
         $newPasswordError = "New password is required.";
     } elseif (strlen(trim($_POST["newPassword"])) < 8) {
@@ -29,7 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $newPassword = trim($_POST["newPassword"]);
     }
 
-    // Validate confirm password
     if (empty(trim($_POST["confirmPassword"]))) {
         $confirmPasswordError = "Please confirm your new password.";
     } else {
@@ -39,17 +35,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // If there are no validation errors, proceed to check old password and update
     if (empty($oldPasswordError) && empty($newPasswordError) && empty($confirmPasswordError)) {
-
-        // Prepare a select statement to get the current password, escaping the reserved keyword `pass`
-        $sql_get_pass = "SELECT `pass` FROM user WHERE id = ?";
+        $sql_get_pass = "SELECT pass FROM user WHERE id = ?";
         if ($stmt_get_pass = mysqli_prepare($conn, $sql_get_pass)) {
             mysqli_stmt_bind_param($stmt_get_pass, "i", $_SESSION["id"]);
 
             if (mysqli_stmt_execute($stmt_get_pass)) {
                 mysqli_stmt_store_result($stmt_get_pass);
-
                 if (mysqli_stmt_num_rows($stmt_get_pass) == 1) {
                     mysqli_stmt_bind_result($stmt_get_pass, $current_password);
                     if (mysqli_stmt_fetch($stmt_get_pass)) {
@@ -64,15 +56,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_stmt_close($stmt_get_pass);
         }
 
-        // If old password is correct, update to new password
         if (empty($oldPasswordError)) {
-            // Prepare an update statement, escaping the reserved keyword `pass`
-            $sql_update_pass = "UPDATE user SET `pass` = ? WHERE id = ?";
+            $sql_update_pass = "UPDATE user SET pass = ? WHERE id = ?";
             if ($stmt_update_pass = mysqli_prepare($conn, $sql_update_pass)) {
                 mysqli_stmt_bind_param($stmt_update_pass, "si", $newPassword, $_SESSION["id"]);
 
                 if (mysqli_stmt_execute($stmt_update_pass)) {
-                    // Password updated successfully. Destroy the session and redirect to login page.
                     session_destroy();
                     header("location: ../view/php/login.php?status=password_changed");
                     exit();
@@ -84,7 +73,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // If there were any errors, redirect back with them
     if (!empty($oldPasswordError) || !empty($newPasswordError) || !empty($confirmPasswordError)) {
         $errors = [
             'oldPasswordError' => $oldPasswordError,
@@ -95,7 +83,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
     mysqli_close($conn);
-
 } else {
     header("location: ../view/php/change_password.php");
     exit();

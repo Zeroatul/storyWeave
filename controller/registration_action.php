@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $param_uname = $fullName;
             $param_email = $email;
-            $param_pass = $password;
+            $param_pass = $password; // Storing plain text password
 
             if (mysqli_stmt_execute($stmt)) {
                 header("location: ../view/php/login.php");

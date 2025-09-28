@@ -1,14 +1,29 @@
 <?php
-// Initialize the session
 session_start();
+require_once '../../model/db_connect.php';
 
-// Check if the user is logged in, if not then redirect to login page
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
     exit;
 }
 
 $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
+$user_id = $_SESSION["id"];
+
+// Fetch stories created by the logged-in user
+$my_stories = [];
+$sql = "SELECT id, title, genre, status FROM stories WHERE user_id = ? ORDER BY created_at DESC";
+if($stmt = mysqli_prepare($conn, $sql)){
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    if(mysqli_stmt_execute($stmt)){
+        $result = mysqli_stmt_get_result($stmt);
+        while($row = mysqli_fetch_assoc($result)){
+            $my_stories[] = $row;
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
+mysqli_close($conn);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,7 +43,6 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
                 <ul class="dropdown-menu">
                     <li><a href="update_profile.php">My Profile</a></li>
                     <li><a href="manage-stories.php">My Stories</a></li>
-                    <li><a href="story-analytics.php">Story Analytics</a></li>
                     <li><a href="review-submissions.php">Submissions</a></li>
                     <li><a href="logout.php">Log Out</a></li>
                 </ul>
@@ -41,28 +55,23 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
             <a href="create-story.php" class="btn">Create New Story</a>
         </header>
         <div class="stories-list">
-            <div class="story-item">
-                <div class="story-info">
-                    <h3>The Last Starlight</h3>
-                    <p>Fantasy - 120 Subscribers</p>
-                </div>
-                <div class="story-actions">
-                    <button class="status-toggle status-in-progress">In Progress</button>
-                    <a href="story-analytics.php" class="btn btn-secondary">Analytics</a>
-                    <a href="contributor_management.php" class="btn btn-secondary">Contributors</a>
-                </div>
-            </div>
-            <div class="story-item">
-                <div class="story-info">
-                    <h3>Metropolis Noir</h3>
-                    <p>Mystery - 85 Subscribers</p>
-                </div>
-                <div class="story-actions">
-                    <button class="status-toggle status-finished">Finished</button>
-                    <a href="story-analytics.php" class="btn btn-secondary">Analytics</a>
-                    <a href="contributor_management.php" class="btn btn-secondary">Contributors</a>
-                </div>
-            </div>
+            <?php if (!empty($my_stories)): ?>
+                <?php foreach ($my_stories as $story): ?>
+                    <div class="story-item">
+                        <div class="story-info">
+                            <h3><?php echo htmlspecialchars($story['title']); ?></h3>
+                            <p><?php echo htmlspecialchars($story['genre']); ?></p>
+                        </div>
+                        <div class="story-actions">
+                             <span class="status-toggle <?php echo ($story['status'] == 'In Progress') ? 'status-in-progress' : 'status-finished'; ?>"><?php echo htmlspecialchars($story['status']); ?></span>
+                            <a href="review-submissions.php?story_id=<?php echo $story['id']; ?>" class="btn btn-secondary">Submissions</a>
+                            <a href="contributor_management.php?story_id=<?php echo $story['id']; ?>" class="btn btn-secondary">Contributors</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="text-align: center; padding: 20px;">You haven't created any stories yet. <a href="create-story.php">Start one now</a>!</p>
+            <?php endif; ?>
         </div>
     </main>
     <footer class="main-footer">

@@ -33,14 +33,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     mysqli_stmt_bind_result($stmt, $id, $uname, $db_email, $db_password);
                     if (mysqli_stmt_fetch($stmt)) {
                         if ($password == $db_password) {
+                            // Password is correct, so start a new session
+                            session_start();
+
+                            // Store data in session variables
                             $_SESSION["loggedin"] = true;
                             $_SESSION["id"] = $id;
                             $_SESSION["email"] = $db_email;
                             $_SESSION["fullName"] = $uname;
 
+                            // Redirect user to home page
                             header("location: ../view/php/home.php");
                             exit;
                         } else {
+                            // Password is not valid
                             $passwordError = "The password you entered was not valid.";
                         }
                     }
@@ -55,13 +61,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (!empty($emailError) || !empty($passwordError)) {
-        // Store errors and email in session instead of URL
         $_SESSION['login_errors'] = [
             'emailError' => $emailError,
             'passwordError' => $passwordError,
             'email' => trim($_POST["email"])
         ];
-        // Redirect without query string
         header("location: ../view/php/login.php");
         exit();
     }

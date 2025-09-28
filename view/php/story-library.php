@@ -1,11 +1,28 @@
 <?php
-// Initialize the session
 session_start();
+require_once '../../model/db_connect.php';
 
 $loggedin = isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true;
 if($loggedin){
     $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
 }
+
+// Fetch all stories
+$stories = [];
+$sql = "SELECT s.id, s.title, s.genre, s.status, s.synopsis, u.uname AS author_name
+        FROM stories s
+        JOIN user u ON s.user_id = u.id
+        ORDER BY s.created_at DESC";
+
+if ($result = mysqli_query($conn, $sql)) {
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $stories[] = $row;
+        }
+    }
+    mysqli_free_result($result);
+}
+mysqli_close($conn);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -39,105 +56,25 @@ if($loggedin){
     <main class="library-wrapper">
         <h1 class="page-title">Story Library</h1>
 
-        <div class="filter-controls">
-            <div class="filter-group">
-                <label for="search">Search Title</label>
-                <input type="text" id="search" name="search" placeholder="e.g., The Last Starlight">
-            </div>
-            <div class="filter-group">
-                <label for="genre">Genre</label>
-                <select id="genre" name="genre">
-                    <option value="all">All Genres</option>
-                    <option value="fantasy">Fantasy</option>
-                    <option value="sci-fi">Sci-Fi</option>
-                    <option value="mystery">Mystery</option>
-                    <option value="romance">Romance</option>
-                    <option value="thriller">Thriller</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="status">Status</label>
-                <select id="status" name="status">
-                    <option value="all">Any Status</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="finished">Finished</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="sort">Sort By</label>
-                <select id="sort" name="sort">
-                    <option value="popularity">Popularity</option>
-                    <option value="recent">Most Recent</option>
-                </select>
-            </div>
-        </div>
-
         <div class="story-grid">
-            <div class="story-card">
-                <h3>The Last Starlight</h3>
-                <div class="author">by Amelia Vance</div>
-                <div class="card-tags">
-                    <span class="tag genre-tag">Fantasy</span>
-                    <span class="tag status-in-progress">In Progress</span>
-                </div>
-                <p>An ancient prophecy awakens, and a young librarian is the only one who can decipher the stars to prevent eternal darkness...</p>
-                <a href="read-story.php" class="read-now-btn">Read Now</a>
-            </div>
-
-            <div class="story-card">
-                <h3>Echoes of Mars</h3>
-                <div class="author">by Kenji Tanaka</div>
-                <div class="card-tags">
-                    <span class="tag genre-tag">Sci-Fi</span>
-                    <span class="tag status-in-progress">In Progress</span>
-                </div>
-                <p>A lone colonist on Mars discovers a mysterious signal that isn't from Earth, forcing her to question the true purpose of her mission.</p>
-                <a href="read-story.php" class="read-now-btn">Read Now</a>
-            </div>
-
-            <div class="story-card">
-                <h3>The Clockwork Detective</h3>
-                <div class="author">by Eleanor Bishop</div>
-                <div class="card-tags">
-                    <span class="tag genre-tag">Mystery</span>
-                    <span class="tag status-finished">Finished</span>
-                </div>
-                <p>In a Victorian city powered by steam, a retired inspector is called back to solve a murder where the only witness is an automaton.</p>
-                <a href="read-story.php" class="read-now-btn">Read Now</a>
-            </div>
-
-            <div class="story-card">
-                <h3>Ocean's Heart</h3>
-                <div class="author">by Maria Flores</div>
-                <div class="card-tags">
-                    <span class="tag genre-tag">Romance</span>
-                    <span class="tag status-finished">Finished</span>
-                </div>
-                <p>A marine biologist studying a rare coral reef finds an old diary that leads her to a lost treasure and an unexpected romance.</p>
-                <a href="read-story.php" class="read-now-btn">Read Now</a>
-            </div>
-
-             <div class="story-card">
-                <h3>The Crimson Cipher</h3>
-                <div class="author">by David Chen</div>
-                <div class="card-tags">
-                    <span class="tag genre-tag">Thriller</span>
-                    <span class="tag status-in-progress">In Progress</span>
-                </div>
-                <p>A cryptographer is pulled into a global conspiracy when he accidentally deciphers a message hidden within a famous painting.</p>
-                <a href="read-story.php" class="read-now-btn">Read Now</a>
-            </div>
-
-             <div class="story-card">
-                <h3>Gatekeepers of Eldoria</h3>
-                <div class="author">by Sarah Jenkins</div>
-                <div class="card-tags">
-                    <span class="tag genre-tag">Fantasy</span>
-                    <span class="tag status-in-progress">In Progress</span>
-                </div>
-                <p>Two rival apprentices must join forces to close a magical rift before their world is consumed by creatures from another dimension.</p>
-                <a href="read-story.php" class="read-now-btn">Read Now</a>
-            </div>
+            <?php if (!empty($stories)): ?>
+                <?php foreach ($stories as $story): ?>
+                    <div class="story-card">
+                        <h3><?php echo htmlspecialchars($story['title']); ?></h3>
+                        <div class="author">by <?php echo htmlspecialchars($story['author_name']); ?></div>
+                        <div class="card-tags">
+                            <span class="tag genre-tag"><?php echo htmlspecialchars($story['genre']); ?></span>
+                            <span class="tag <?php echo ($story['status'] == 'In Progress') ? 'status-in-progress' : 'status-finished'; ?>">
+                                <?php echo htmlspecialchars($story['status']); ?>
+                            </span>
+                        </div>
+                        <p><?php echo htmlspecialchars(substr($story['synopsis'], 0, 150)) . '...'; ?></p>
+                        <a href="read-story.php?story_id=<?php echo $story['id']; ?>" class="read-now-btn">Read Now</a>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p style="text-align: center; color: #606770;">No stories have been created yet. Be the first!</p>
+            <?php endif; ?>
         </div>
     </main>
 

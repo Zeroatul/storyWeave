@@ -1,53 +1,64 @@
 <?php
 session_start();
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['comment'])) {
-    if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true && !empty(trim($_POST['comment']))){
-        $new_comment = [
-            'author' => $_SESSION["fullName"],
-            'text' => htmlspecialchars(trim($_POST['comment'])),
-            'timestamp' => time()
-        ];
-
-        $comments = [];
-        if(isset($_COOKIE['story_comments'])) {
-            $comments = json_decode($_COOKIE['story_comments'], true);
-        }
-
-        $comments[] = $new_comment;
-
-        setcookie('story_comments', json_encode($comments), time() + (86400 * 30), "/");
-
-        header("Location: read-story.php");
-        exit();
-    }
-}
+require_once '../../model/db_connect.php';
 
 $loggedin = isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true;
 if($loggedin){
     $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
 }
 
-$comments = [];
-if(isset($_COOKIE['story_comments'])) {
-    $comments = json_decode($_COOKIE['story_comments'], true);
+if(!isset($_GET['story_id']) || empty($_GET['story_id'])){
+    header("location: story-library.php");
+    exit;
 }
+
+$story_id = $_GET['story_id'];
+
+// Fetch story details
+$story = null;
+$sql_story = "SELECT s.title, u.uname AS author_name FROM stories s JOIN user u ON s.user_id = u.id WHERE s.id = ?";
+if($stmt_story = mysqli_prepare($conn, $sql_story)){
+    mysqli_stmt_bind_param($stmt_story, "i", $story_id);
+    if(mysqli_stmt_execute($stmt_story)){
+        $result_story = mysqli_stmt_get_result($stmt_story);
+        if(mysqli_num_rows($result_story) == 1){
+            $story = mysqli_fetch_assoc($result_story);
+        } else {
+            // Story not found
+            header("location: story-library.php");
+            exit;
+        }
+    }
+    mysqli_stmt_close($stmt_story);
+}
+
+// Fetch chapters
+$chapters = [];
+$sql_chapters = "SELECT id, chapter_number, title, content FROM chapters WHERE story_id = ? ORDER BY chapter_number ASC";
+if($stmt_chapters = mysqli_prepare($conn, $sql_chapters)){
+    mysqli_stmt_bind_param($stmt_chapters, "i", $story_id);
+    if(mysqli_stmt_execute($stmt_chapters)){
+        $result_chapters = mysqli_stmt_get_result($stmt_chapters);
+        while($row = mysqli_fetch_assoc($result_chapters)){
+            $chapters[] = $row;
+        }
+    }
+    mysqli_stmt_close($stmt_chapters);
+}
+
+// For now, we will display the first chapter.
+// A more advanced version could take a chapter number from the URL.
+$current_chapter = !empty($chapters) ? $chapters[0] : null;
+
+mysqli_close($conn);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Story Weave</title>
+    <title><?php echo $story ? htmlspecialchars($story['title']) : 'Story'; ?> - Story Weave</title>
 	<link href="../css/read-story.css" rel="stylesheet">
-    <style>
-        .comments-list { margin-bottom: 30px; }
-        .comment { border-bottom: 1px solid #f0f2f5; padding: 15px 0; }
-        .comment:last-child { border-bottom: none; }
-        .comment strong { color: #1c1e21; }
-        .comment .comment-date { font-size: 12px; color: #606770; margin-left: 8px; }
-        .comment p { margin: 5px 0 0 0; }
-    </style>
 </head>
 <body>
     <header class="main-header">
@@ -69,61 +80,36 @@ if(isset($_COOKIE['story_comments'])) {
         </nav>
     </header>
     <div class="story-container">
+        <?php if ($story && $current_chapter): ?>
         <main class="story-main-content">
-            <h1 class="story-title">The Last Starlight</h1>
-            <div class="story-author">by Amelia Vance</div>
-            <h2 class="chapter-title">Chapter 1: The Fading Firmament</h2>
+            <h1 class="story-title"><?php echo htmlspecialchars($story['title']); ?></h1>
+            <div class="story-author">by <?php echo htmlspecialchars($story['author_name']); ?></div>
+            <h2 class="chapter-title">Chapter <?php echo htmlspecialchars($current_chapter['chapter_number']); ?>: <?php echo htmlspecialchars($current_chapter['title']); ?></h2>
             <div class="chapter-content">
-                <p>In a world where stars are fading, a young archivist discovers a living map that leads to the last source of light. But the map is coveted by those who would rather rule in darkness. Elara traced the glowing constellations on the cover of the ancient tome. It felt warm to the touch, humming with a forgotten energy. The Grand Archive was her sanctuary, a place of dust and silence, but this book felt alive.</p>
-                <p>For generations, the people of Atheria had watched the night sky grow dimmer. The stories of a thousand glittering stars were now just that—stories. Only a handful of the brightest remained, pale ghosts of their former glory. The Royal Astronomers claimed it was a natural cycle, but the whispers in the forgotten texts spoke of a stolen light, a celestial heart that had been shattered.</p>
-                <p>The map on the book's cover was not of Atheria. The constellations were alien, yet hauntingly familiar. As her fingers brushed against a spiraling galaxy, the pages of the book fluttered open, revealing not words, but a swirling vortex of light. It pulled at her, a silent invitation to a world beyond the veil of their dying sky. With a deep breath, she plunged her hand into the light.</p>
-            </div>
-            <div class="comment-section">
-                <h3 class="widget-title">Comments</h3>
-                <div class="comments-list">
-                    <?php if (!empty($comments)): ?>
-                        <?php foreach (array_reverse($comments) as $comment): ?>
-                            <div class="comment">
-                                <strong><?php echo htmlspecialchars($comment['author']); ?></strong>
-                                <span class="comment-date"><?php echo date('M d, Y', $comment['timestamp']); ?></span>
-                                <p><?php echo nl2br(htmlspecialchars($comment['text'])); ?></p>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>No comments yet. Be the first to share your thoughts!</p>
-                    <?php endif; ?>
-                </div>
-
-                <?php if($loggedin): ?>
-                    <h3 class="widget-title">Leave a Comment</h3>
-                    <form class="comment-form" method="POST" action="read-story.php">
-                        <textarea name="comment" placeholder="Share your thoughts on this chapter..."></textarea>
-                        <button class="btn" type="submit">Post Comment</button>
-                    </form>
-                <?php else: ?>
-                    <p><a href="login.php">Log in</a> to leave a comment.</p>
-                <?php endif; ?>
+                <?php echo nl2br(htmlspecialchars($current_chapter['content'])); ?>
             </div>
         </main>
         <aside class="story-sidebar">
             <div class="sidebar-widget">
-                <h3 class="widget-title">Story Actions</h3>
-                <a href="#" class="btn">Subscribe to Story</a>
-                <a href="#" class="btn btn-secondary" style="margin-top: 10px;">View Story Branches</a>
-            </div>
-            <div class="sidebar-widget">
                 <h3 class="widget-title">Chapters</h3>
                 <ul class="chapter-list">
-                    <li class="active"><a href="#">Chapter 1: The Fading Firmament</a></li>
-                    <li><a href="#">Chapter 2: The Celestial Key</a></li>
-                    <li><a href="#">Chapter 3 (Coming Soon)</a></li>
+                    <?php foreach($chapters as $chapter): ?>
+                         <li class="<?php echo ($chapter['id'] == $current_chapter['id']) ? 'active' : ''; ?>">
+                             <a href="#">Chapter <?php echo htmlspecialchars($chapter['chapter_number']); ?>: <?php echo htmlspecialchars($chapter['title']); ?></a>
+                         </li>
+                    <?php endforeach; ?>
                 </ul>
             </div>
         </aside>
+        <?php else: ?>
+            <main class="story-main-content">
+                <h1 class="story-title">Story Not Found</h1>
+                <p>This story or its chapters could not be found. It might be under construction!</p>
+            </main>
+        <?php endif; ?>
     </div>
     <footer class="main-footer">
         <p>&copy; 2025 Story Weave. All Rights Reserved.</p>
     </footer>
 </body>
 </html>
-
