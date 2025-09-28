@@ -1,0 +1,227 @@
+body {
+            font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            color: #333;
+        }
+        .main-header {
+            background-color: #ffffff;
+            padding: 0 40px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 65px;
+        }
+        .logo a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 35px;
+        }
+        .main-nav {
+            display: flex;
+            align-items: center;
+        }
+        .main-nav a {
+            text-decoration: none;
+            color: #606770;
+            margin-left: 25px;
+            font-weight: 500;
+        }
+        .main-nav a:hover {
+            color: #0c66e4;
+        }
+        .profile-dropdown {
+            position: relative;
+            margin-left: 25px;
+        }
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #0c66e4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            list-style: none;
+            padding: 8px 0;
+            margin: 0;
+            min-width: 180px;
+            z-index: 1001;
+            border: 1px solid #dddfe2;
+        }
+        .profile-dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .dropdown-menu li a {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            margin-left: 0;
+            font-size: 14px;
+        }
+        .dropdown-menu li a:hover {
+            background-color: #f0f2f5;
+            color: #1c1e21;
+        }
+        .dropdown-menu li {
+            border-top: 1px solid #f0f2f5;
+        }
+        .dropdown-menu li:first-child {
+            border-top: none;
+        }
+        .management-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        .page-header p {
+            font-size: 18px;
+            color: #606770;
+            margin: 0;
+        }
+        .management-widget {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        .widget-title {
+            font-size: 22px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .invite-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .invite-form input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #1877f2;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #166fe5;
+        }
+        .user-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .user-list-item:last-child {
+            border-bottom: none;
+        }
+        .btn-danger {
+            background-color: #fa383e;
+        }
+        .btn-danger:hover {
+            background-color: #e32327;
+        }
+        .btn-secondary {
+            background-color: #e4e6eb;
+            color: #1c1e21;
+        }
+         .btn-secondary:hover {
+            background-color: #d8dbdf;
+        }
+        .main-footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+            border-top: 1px solid #dddfe2;
+            color: #606770;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            text-align: left;
+            margin-top: 5px;
+            min-height: 18px;
+            width: 100%;
+        }
+
+        .invite-form input.invalid {
+            border-color: #e74c3c;
+        }
+
+        .invite-form input.invalid:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.25);
+        }
+
+        .success-message {
+            color: #28a745;
+            background-color: #e9f7ec;
+            border: 1px solid #a3e0b0;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .back-to-home-link {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #606770;
+            text-align: center;
+            display: block;
+        }
+
+        .back-to-home-link a {
+            color: #0c66e4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-to-home-link a:hover {
+            text-decoration: underline;
+        }

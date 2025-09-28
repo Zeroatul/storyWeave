@@ -1,0 +1,179 @@
+		body {
+            font-family:  "Segoe UI",  Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            color: #333;
+        }
+        .main-header {
+            background-color: #ffffff;
+            padding: 0 40px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 65px;
+        }
+        .logo a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            height: 35px;
+        }
+        .main-nav {
+            display: flex;
+            align-items: center;
+        }
+        .main-nav a {
+            text-decoration: none;
+            color: #606770;
+            margin-left: 25px;
+            font-weight: 500;
+        }
+        .main-nav a:hover {
+            color: #0c66e4;
+        }
+        .profile-dropdown {
+            position: relative;
+            margin-left: 25px;
+        }
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #0c66e4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 120%;
+            right: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            list-style: none;
+            padding: 8px 0;
+            margin: 0;
+            min-width: 180px;
+            z-index: 1001;
+            border: 1px solid #dddfe2;
+        }
+        .profile-dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        .dropdown-menu li a {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            margin-left: 0;
+            font-size: 14px;
+        }
+        .dropdown-menu li a:hover {
+            background-color: #f0f2f5;
+            color: #1c1e21;
+        }
+        .dropdown-menu li {
+            border-top: 1px solid #f0f2f5;
+        }
+        .dropdown-menu li:first-child {
+            border-top: none;
+        }
+        .review-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .review-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .review-header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        .review-header p {
+            font-size: 18px;
+            color: #606770;
+        }
+        .submissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        .submission-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+        }
+        .submission-card.is-winner {
+            border-color: #0c66e4;
+            box-shadow: 0 6px 16px rgba(12, 102, 228, 0.2);
+        }
+        .submission-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #1c1e21;
+        }
+        .submission-content {
+            flex-grow: 1;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .card-footer {
+            margin-top: auto;
+        }
+        .btn {
+            background-color: #0c66e4;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-selected {
+            background-color: #1f9e54;
+            cursor: default;
+        }
+        .btn-secondary {
+            background-color: #e9f2ff;
+            color: #0c66e4;
+        }
+        .btn-secondary:hover {
+            background-color: #d0e5ff;
+        }
+        .main-footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+            border-top: 1px solid #dddfe2;
+            color: #606770;
+        }
