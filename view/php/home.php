@@ -12,7 +12,7 @@ if($loggedin){
 // Fetch the 3 most recent stories
 $stories = [];
 // Corrected the column name from s.author_id to s.user_id
-$sql = "SELECT s.title, s.genre, s.status, s.synopsis, u.uname AS author_name
+$sql = "SELECT s.id, s.title, s.genre, s.status, s.synopsis, u.uname AS author_name
         FROM stories s
         JOIN user u ON s.user_id = u.id
         ORDER BY s.created_at DESC
@@ -88,7 +88,7 @@ mysqli_close($conn);
                                 </span>
                             </div>
                             <p><?php echo htmlspecialchars(substr($story['synopsis'], 0, 150)) . '...'; ?></p>
-                            <a href="read-story.php" class="read-now-btn">Read Now</a>
+                            <a href="read-story.php?story_id=<?php echo $story['id']; ?>" class="read-now-btn">Read Now</a>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -104,4 +104,3 @@ mysqli_close($conn);
 
 </body>
 </html>
-
