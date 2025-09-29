@@ -14,7 +14,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    height: 85px; /* Consistent height */
+    height: 85px;
 }
 .logo a {
     text-decoration: none;
@@ -23,8 +23,7 @@ body {
     align-items: center;
 }
 .logo img {
-    text-decoration: none;
-    height: 135px; /* Consistent logo size */
+    height: 135px;
     padding-left: 100px;
     width: 180px;
     margin-top: 10px;
@@ -38,9 +37,6 @@ body {
     color: #606770;
     margin-left: 25px;
     font-weight: 500;
-}
-.main-nav a:hover {
-    color: #0c66e4;
 }
 .profile-dropdown {
     position: relative;
@@ -62,7 +58,7 @@ body {
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%; /* Corrected position */
+    top: 100%;
     right: 0;
     background-color: white;
     border-radius: 8px;
@@ -72,7 +68,6 @@ body {
     margin: 0;
     min-width: 180px;
     z-index: 1001;
-    border: 1px solid #dddfe2;
 }
 .profile-dropdown:hover .dropdown-menu {
     display: block;
@@ -83,107 +78,85 @@ body {
     color: #333;
     text-decoration: none;
     margin-left: 0;
-    font-size: 14px;
 }
-.dropdown-menu li a:hover {
-    background-color: #f0f2f5;
-    color: #1c1e21;
-}
-.dropdown-menu li {
-    border-top: 1px solid #f0f2f5;
-}
-.dropdown-menu li:first-child {
-    border-top: none;
-}
-.review-container {
-    max-width: 1200px;
+.write-chapter-container {
+    max-width: 900px;
     margin: 40px auto;
-    padding: 0 40px;
-}
-.review-header {
-    text-align: center;
-    margin-bottom: 40px;
-}
-.review-header h1 {
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-.review-header p {
-    font-size: 18px;
-    color: #606770;
-}
-.submissions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 30px;
-}
-.submission-card {
+    padding: 40px;
     background-color: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    padding: 25px;
-    display: flex;
-    flex-direction: column;
-    border: 2px solid transparent;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
-.submission-card.is-winner {
-    border-color: #0c66e4;
-    box-shadow: 0 6px 16px rgba(12, 102, 228, 0.2);
+.write-chapter-container h1 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 10px;
 }
-.submission-card h3 {
-    margin-top: 0;
-    font-size: 18px;
-    color: #1c1e21;
+.write-chapter-container p {
+    text-align: center;
+    color: #606770;
+    margin-bottom: 30px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
-.submission-content {
-    flex-grow: 1;
-    font-size: 15px;
-    line-height: 1.6;
-    color: #333;
-    padding: 15px;
-    background-color: #f9f9f9;
+.input-group {
+    margin-bottom: 25px;
+}
+.input-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #dddfe2;
     border-radius: 6px;
-    margin-bottom: 20px;
-    max-height: 300px;
-    overflow-y: auto;
+    font-size: 16px;
+    box-sizing: border-box;
 }
-.card-footer {
-    margin-top: auto;
+.input-group input:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: #0c66e4;
+    box-shadow: 0 0 0 2px rgba(12, 102, 228, 0.2);
+}
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+.btn {
+    flex-grow: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
 }
 .btn {
     background-color: #0c66e4;
     color: #ffffff;
-    padding: 12px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    width: 100%;
-    text-align: center;
 }
-.btn-selected {
-    background-color: #1f9e54;
-    cursor: default;
-}
-.btn-rejected {
-    background-color: #606770;
-    color: #fff;
-    cursor: default;
+.btn:hover {
+    background-color: #0052cc;
 }
 .btn-secondary {
-    background-color: #e9f2ff;
-    color: #0c66e4;
+    background-color: #e4e6eb;
+    color: #1c1e21;
 }
 .btn-secondary:hover {
-    background-color: #d0e5ff;
+    background-color: #d8dbdf;
 }
 .main-footer {
     text-align: center;
     padding: 30px;
-    margin-top: 40px;
+    margin-top: 60px;
     border-top: 1px solid #dddfe2;
     color: #606770;
 }
-
