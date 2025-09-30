@@ -14,7 +14,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    height: 65px;
+    height: 85px;
 }
 .logo a {
     text-decoration: none;
@@ -23,7 +23,11 @@ body {
     align-items: center;
 }
 .logo img {
-    height: 35px;
+    text-decoration: none;
+    height: 135px;
+    padding-left: 100px;
+    width: 180px;
+    margin-top: 10px;
 }
 .main-nav {
     display: flex;
@@ -55,7 +59,7 @@ body {
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 120%;
+    top: 100%;
     right: 0;
     background-color: white;
     border-radius: 8px;
@@ -154,4 +158,3 @@ body {
     border-top: 1px solid #dddfe2;
     color: #606770;
 }
-

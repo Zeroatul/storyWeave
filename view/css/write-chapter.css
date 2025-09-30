@@ -23,6 +23,7 @@ body {
     align-items: center;
 }
 .logo img {
+    text-decoration: none;
     height: 135px;
     padding-left: 100px;
     width: 180px;
@@ -80,7 +81,7 @@ body {
     margin-left: 0;
 }
 .write-chapter-container {
-    max-width: 900px;
+    max-width: 800px;
     margin: 40px auto;
     padding: 40px;
     background-color: #ffffff;
@@ -96,9 +97,6 @@ body {
     text-align: center;
     color: #606770;
     margin-bottom: 30px;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
 }
 .input-group {
     margin-bottom: 25px;
@@ -117,6 +115,10 @@ body {
     font-size: 16px;
     box-sizing: border-box;
 }
+.input-group textarea {
+    min-height: 300px;
+    resize: vertical;
+}
 .input-group input:focus,
 .input-group textarea:focus {
     outline: none;
@@ -125,33 +127,20 @@ body {
 }
 .form-actions {
     display: flex;
-    gap: 15px;
-    margin-top: 10px;
+    justify-content: flex-end;
 }
 .btn {
-    flex-grow: 1;
-    padding: 14px;
+    padding: 14px 28px;
     border: none;
     border-radius: 6px;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-}
-.btn {
     background-color: #0c66e4;
     color: #ffffff;
 }
 .btn:hover {
     background-color: #0052cc;
-}
-.btn-secondary {
-    background-color: #e4e6eb;
-    color: #1c1e21;
-}
-.btn-secondary:hover {
-    background-color: #d8dbdf;
 }
 .main-footer {
     text-align: center;
@@ -160,3 +149,4 @@ body {
     border-top: 1px solid #dddfe2;
     color: #606770;
 }
+

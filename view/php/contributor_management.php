@@ -6,49 +6,37 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
     exit;
 }
-if(!isset($_GET['story_id']) || empty($_GET['story_id'])){
-    header("location: manage-stories.php");
-    exit;
+
+$story_id = isset($_GET['story_id']) ? (int)$_GET['story_id'] : 0;
+if ($story_id <= 0) {
+    die("No story selected.");
 }
 
-$story_id = $_GET['story_id'];
+$story_sql = "SELECT title, user_id FROM stories WHERE id = ?";
+$story_info = null;
+if ($stmt = mysqli_prepare($conn, $story_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $story_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $story_info = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+}
+
+if (!$story_info || $story_info['user_id'] != $_SESSION['id']) {
+    die("You do not have permission to manage contributors for this story.");
+}
+
+$emailError = isset($_SESSION['invite_errors']['emailError']) ? $_SESSION['invite_errors']['emailError'] : '';
+$email = isset($_SESSION['invite_errors']['email']) ? $_SESSION['invite_errors']['email'] : '';
+unset($_SESSION['invite_errors']);
+
+$successMessage = '';
+if (isset($_SESSION['invite_success'])) {
+    $successMessage = "An invitation has been sent to <strong>" . htmlspecialchars($_SESSION['invite_success']) . "</strong>.";
+    unset($_SESSION['invite_success']);
+}
+
 $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
-
-// Fetch story details to ensure the logged-in user is the author
-$story = null;
-$sql_story = "SELECT title FROM stories WHERE id = ? AND user_id = ?";
-if($stmt_story = mysqli_prepare($conn, $sql_story)){
-    mysqli_stmt_bind_param($stmt_story, "ii", $story_id, $_SESSION['id']);
-    if(mysqli_stmt_execute($stmt_story)){
-        $result_story = mysqli_stmt_get_result($stmt_story);
-        if(mysqli_num_rows($result_story) == 1){
-            $story = mysqli_fetch_assoc($result_story);
-        } else {
-            // This user is not the owner of the story, or story doesn't exist.
-            header("location: manage-stories.php");
-            exit;
-        }
-    }
-    mysqli_stmt_close($stmt_story);
-}
-
-// Fetch current and blocked contributors
-$contributors = ['active' => [], 'blocked' => []];
-$sql_contributors = "SELECT u.uname, c.status FROM contributors c JOIN user u ON c.user_id = u.id WHERE c.story_id = ?";
-if($stmt_contributors = mysqli_prepare($conn, $sql_contributors)){
-    mysqli_stmt_bind_param($stmt_contributors, "i", $story_id);
-    if(mysqli_stmt_execute($stmt_contributors)){
-        $result_contributors = mysqli_stmt_get_result($stmt_contributors);
-        while($row = mysqli_fetch_assoc($result_contributors)){
-            if($row['status'] == 'Active' || $row['status'] == 'Invited'){
-                 $contributors['active'][] = $row;
-            } elseif($row['status'] == 'Blocked'){
-                 $contributors['blocked'][] = $row;
-            }
-        }
-    }
-    mysqli_stmt_close($stmt_contributors);
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -63,60 +51,44 @@ if($stmt_contributors = mysqli_prepare($conn, $sql_contributors)){
         <div class="logo"><a href="home.php"><img src="../src/logo.png" alt="Story Weave Logo"></a></div>
         <nav class="main-nav">
             <a href="story-library.php">Browse Stories</a>
-            <div class="profile-dropdown">
-                <div class="profile-avatar"><?php echo htmlspecialchars($first_initial); ?></div>
-                <ul class="dropdown-menu">
-                    <li><a href="update_profile.php">My Profile</a></li>
-                    <li><a href="manage-stories.php">My Stories</a></li>
-                    <li><a href="logout.php">Log Out</a></li>
-                </ul>
-            </div>
+            <?php if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                <div class="profile-dropdown">
+                    <div class="profile-avatar"><?php echo htmlspecialchars($first_initial); ?></div>
+                    <ul class="dropdown-menu">
+                        <li><a href="update_profile.php">My Profile</a></li>
+                        <li><a href="manage-stories.php">My Stories</a></li>
+                        <li><a href="story-analytics.php">Story Analytics</a></li>
+                        <li><a href="review-submissions.php">Submissions</a></li>
+                        <li><a href="change_password.php">Change Password</a></li>
+                        <li><a href="logout.php">Log Out</a></li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <a href="login.php">Log In</a>
+                <a href="registration.php">Sign Up</a>
+            <?php endif; ?>
         </nav>
     </header>
     <main class="management-container">
         <header class="page-header">
             <h1>Contributor Management</h1>
-            <p>For <em><?php echo htmlspecialchars($story['title']); ?></em></p>
+            <p>For <em><?php echo htmlspecialchars($story_info['title']); ?></em></p>
         </header>
         <section class="management-widget">
             <h2 class="widget-title">Invite a Contributor</h2>
             <div class="invite-container">
+            <?php if (!empty($successMessage)): ?>
+                <div class="success-message"><?php echo $successMessage; ?></div>
+            <?php endif; ?>
                 <form class="invite-form" id="invite-form" method="POST" action="../../controller/contributor_management_action.php">
                     <input type="hidden" name="story_id" value="<?php echo $story_id; ?>">
-                    <input type="email" id="email" name="email" placeholder="Enter user's email address">
+                    <input type="email" id="email" name="email" placeholder="Enter user's email address" value="<?php echo htmlspecialchars($email); ?>" class="<?php echo !empty($emailError) ? 'invalid' : ''; ?>">
                     <button class="btn" type="submit">Send Invite</button>
+                    <?php if (!empty($emailError)): ?>
+                        <div class="error-message" id="emailError"><?php echo $emailError; ?></div>
+                    <?php endif; ?>
                 </form>
             </div>
-        </section>
-        <section class="management-widget">
-            <h2 class="widget-title">Current Contributors</h2>
-            <ul class="user-list">
-                <?php if(!empty($contributors['active'])): ?>
-                    <?php foreach($contributors['active'] as $contributor): ?>
-                        <li class="user-list-item">
-                            <span><?php echo htmlspecialchars($contributor['uname']); ?> (<?php echo htmlspecialchars($contributor['status']); ?>)</span>
-                            <button class="btn btn-danger">Block</button>
-                        </li>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <li class="user-list-item"><span>No active contributors yet.</span></li>
-                <?php endif; ?>
-            </ul>
-        </section>
-        <section class="management-widget">
-            <h2 class="widget-title">Blocked Users</h2>
-            <ul class="user-list">
-                 <?php if(!empty($contributors['blocked'])): ?>
-                    <?php foreach($contributors['blocked'] as $contributor): ?>
-                        <li class="user-list-item">
-                            <span><?php echo htmlspecialchars($contributor['uname']); ?></span>
-                            <button class="btn btn-secondary">Unblock</button>
-                        </li>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <li class="user-list-item"><span>No users have been blocked.</span></li>
-                <?php endif; ?>
-            </ul>
         </section>
     </main>
     <footer class="main-footer">
@@ -124,3 +96,4 @@ if($stmt_contributors = mysqli_prepare($conn, $sql_contributors)){
     </footer>
 </body>
 </html>
+

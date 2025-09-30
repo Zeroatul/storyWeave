@@ -26,14 +26,22 @@ $draftSynopsis = $draft['synopsis'] ?? '';
         <div class="logo"><a href="home.php"><img src="../src/logo.png" alt="Story Weave Logo"></a></div>
         <nav class="main-nav">
             <a href="story-library.php">Browse Stories</a>
-            <div class="profile-dropdown">
-                <div class="profile-avatar"><?php echo htmlspecialchars($first_initial); ?></div>
-                <ul class="dropdown-menu">
-                    <li><a href="update_profile.php">My Profile</a></li>
-                    <li><a href="manage-stories.php">My Stories</a></li>
-                    <li><a href="logout.php">Log Out</a></li>
-                </ul>
-            </div>
+            <?php if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                <div class="profile-dropdown">
+                    <div class="profile-avatar"><?php echo htmlspecialchars($first_initial); ?></div>
+                    <ul class="dropdown-menu">
+                        <li><a href="update_profile.php">My Profile</a></li>
+                        <li><a href="manage-stories.php">My Stories</a></li>
+                        <li><a href="story-analytics.php">Story Analytics</a></li>
+                        <li><a href="review-submissions.php">Submissions</a></li>
+                        <li><a href="change_password.php">Change Password</a></li>
+                        <li><a href="logout.php">Log Out</a></li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <a href="login.php">Log In</a>
+                <a href="registration.php">Sign Up</a>
+            <?php endif; ?>
         </nav>
     </header>
     <main class="create-story-container">
@@ -50,12 +58,12 @@ $draftSynopsis = $draft['synopsis'] ?? '';
                 <label for="genre">Genre</label>
                 <select id="genre" name="genre" required>
                     <option value="" disabled <?php if(empty($draftGenre)) echo 'selected'; ?>>Select a genre</option>
-                    <option value="fantasy" <?php if($draftGenre == 'fantasy') echo 'selected'; ?>>Fantasy</option>
-                    <option value="sci-fi" <?php if($draftGenre == 'sci-fi') echo 'selected'; ?>>Sci-Fi</option>
-                    <option value="mystery" <?php if($draftGenre == 'mystery') echo 'selected'; ?>>Mystery</option>
-                    <option value="romance" <?php if($draftGenre == 'romance') echo 'selected'; ?>>Romance</option>
-                    <option value="thriller" <?php if($draftGenre == 'thriller') echo 'selected'; ?>>Thriller</option>
-                    <option value="horror" <?php if($draftGenre == 'horror') echo 'selected'; ?>>Horror</option>
+                    <option value="Fantasy" <?php if($draftGenre == 'Fantasy') echo 'selected'; ?>>Fantasy</option>
+                    <option value="Sci-Fi" <?php if($draftGenre == 'Sci-Fi') echo 'selected'; ?>>Sci-Fi</option>
+                    <option value="Mystery" <?php if($draftGenre == 'Mystery') echo 'selected'; ?>>Mystery</option>
+                    <option value="Romance" <?php if($draftGenre == 'Romance') echo 'selected'; ?>>Romance</option>
+                    <option value="Thriller" <?php if($draftGenre == 'Thriller') echo 'selected'; ?>>Thriller</option>
+                    <option value="Horror" <?php if($draftGenre == 'Horror') echo 'selected'; ?>>Horror</option>
                 </select>
             </div>
 

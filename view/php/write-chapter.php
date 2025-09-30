@@ -7,42 +7,40 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     exit;
 }
 
-$story_id = filter_input(INPUT_GET, 'story_id', FILTER_VALIDATE_INT);
-if (!$story_id) {
-    header("location: story-library.php");
-    exit;
+$story_id = isset($_GET['story_id']) ? (int)$_GET['story_id'] : 0;
+
+if ($story_id <= 0) {
+    die("Invalid story ID.");
 }
 
-// Fetch story details
-$story = null;
-$sql_story = "SELECT title FROM stories WHERE id = ?";
-if ($stmt_story = mysqli_prepare($conn, $sql_story)) {
-    mysqli_stmt_bind_param($stmt_story, "i", $story_id);
-    mysqli_stmt_execute($stmt_story);
-    $result_story = mysqli_stmt_get_result($stmt_story);
-    if (mysqli_num_rows($result_story) == 1) {
-        $story = mysqli_fetch_assoc($result_story);
+$story_sql = "SELECT title FROM stories WHERE id = ?";
+$story_title = '';
+if ($stmt = mysqli_prepare($conn, $story_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $story_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    if ($story = mysqli_fetch_assoc($result)) {
+        $story_title = $story['title'];
+    } else {
+        die("Story not found.");
     }
-    mysqli_stmt_close($stmt_story);
+    mysqli_stmt_close($stmt);
 }
 
-if (!$story) {
-    echo "Story not found.";
-    exit;
+$chapters_sql = "SELECT MAX(chapter_number) as max_chapter FROM chapters WHERE story_id = ?";
+$current_chapter = 0;
+if ($stmt = mysqli_prepare($conn, $chapters_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $story_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    if($row = mysqli_fetch_assoc($result)){
+        $current_chapter = $row['max_chapter'] ?? 0;
+    }
+    mysqli_stmt_close($stmt);
 }
+$next_chapter_number = $current_chapter + 1;
 
-// Determine the next chapter number
-$sql_count = "SELECT COUNT(id) as chapter_count FROM chapters WHERE story_id = ?";
-$chapter_count = 0;
-if($stmt_count = mysqli_prepare($conn, $sql_count)){
-    mysqli_stmt_bind_param($stmt_count, "i", $story_id);
-    mysqli_stmt_execute($stmt_count);
-    $result = mysqli_stmt_get_result($stmt_count);
-    $row = mysqli_fetch_assoc($result);
-    $chapter_count = $row['chapter_count'];
-    mysqli_stmt_close($stmt_count);
-}
-$next_chapter_number = $chapter_count + 1;
+mysqli_close($conn);
 
 $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
 ?>
@@ -59,23 +57,31 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
         <div class="logo"><a href="home.php"><img src="../src/logo.png" alt="Story Weave Logo"></a></div>
         <nav class="main-nav">
             <a href="story-library.php">Browse Stories</a>
-            <div class="profile-dropdown">
-                <div class="profile-avatar"><?php echo htmlspecialchars($first_initial); ?></div>
-                <ul class="dropdown-menu">
-                    <li><a href="update_profile.php">My Profile</a></li>
-                    <li><a href="manage-stories.php">My Stories</a></li>
-                    <li><a href="logout.php">Log Out</a></li>
-                </ul>
-            </div>
+            <?php if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true): ?>
+                <div class="profile-dropdown">
+                    <div class="profile-avatar"><?php echo htmlspecialchars($first_initial); ?></div>
+                    <ul class="dropdown-menu">
+                        <li><a href="update_profile.php">My Profile</a></li>
+                        <li><a href="manage-stories.php">My Stories</a></li>
+                        <li><a href="story-analytics.php">Story Analytics</a></li>
+                        <li><a href="review-submissions.php">Submissions</a></li>
+                        <li><a href="change_password.php">Change Password</a></li>
+                        <li><a href="logout.php">Log Out</a></li>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <a href="login.php">Log In</a>
+                <a href="registration.php">Sign Up</a>
+            <?php endif; ?>
         </nav>
     </header>
     <main class="write-chapter-container">
-        <h1>Write Chapter <?php echo $next_chapter_number; ?> for <em><?php echo htmlspecialchars($story['title']); ?></em></h1>
-        <p>Submit your version of the next chapter. The story's author will review all submissions and select one to become the official chapter.</p>
+        <h1>Submit Your Version of Chapter <?php echo $next_chapter_number; ?></h1>
+        <p>For the story: <em><?php echo htmlspecialchars($story_title); ?></em></p>
 
         <form action="../../controller/write_chapter_action.php" method="POST">
             <input type="hidden" name="story_id" value="<?php echo $story_id; ?>">
-            <input type="hidden" name="for_chapter_number" value="<?php echo $next_chapter_number; ?>">
+            <input type="hidden" name="chapter_number" value="<?php echo $next_chapter_number; ?>">
 
             <div class="input-group">
                 <label for="chapterTitle">Proposed Chapter Title</label>
@@ -84,7 +90,7 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
 
             <div class="input-group">
                 <label for="chapterContent">Chapter Content</label>
-                <textarea id="chapterContent" name="chapterContent" placeholder="Once upon a time..." rows="15" required></textarea>
+                <textarea id="chapterContent" name="chapterContent" placeholder="Continue the story here..." rows="15" required></textarea>
             </div>
 
             <div class="form-actions">

@@ -2,6 +2,12 @@
 session_start();
 require_once '../../model/db_connect.php';
 
+$successMessage = '';
+if (isset($_SESSION['success_message'])) {
+    $successMessage = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
+
 $loggedin = isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true;
 $story_id = isset($_GET['story_id']) ? (int)$_GET['story_id'] : 0;
 $chapter_number = isset($_GET['chapter']) ? (int)$_GET['chapter'] : 1;
@@ -10,7 +16,6 @@ if ($story_id <= 0) {
     die("Invalid story ID.");
 }
 
-// Fetch story details
 $story_sql = "SELECT s.title, u.uname AS author_name, s.synopsis FROM stories s JOIN user u ON s.user_id = u.id WHERE s.id = ?";
 $story = null;
 if ($stmt = mysqli_prepare($conn, $story_sql)) {
@@ -25,7 +30,6 @@ if (!$story) {
     die("Story not found.");
 }
 
-// Fetch all chapters for the sidebar
 $chapters_sql = "SELECT chapter_number, title FROM chapters WHERE story_id = ? ORDER BY chapter_number ASC";
 $chapters = [];
 if ($stmt = mysqli_prepare($conn, $chapters_sql)) {
@@ -40,7 +44,6 @@ if ($stmt = mysqli_prepare($conn, $chapters_sql)) {
 
 $next_chapter_number = count($chapters) + 1;
 
-// Fetch the specific chapter content to display
 $chapter_content = null;
 if (!empty($chapters)) {
     $current_chapter_sql = "SELECT title, content FROM chapters WHERE story_id = ? AND chapter_number = ?";
@@ -53,7 +56,6 @@ if (!empty($chapters)) {
     }
 }
 
-// Fetch comments
 $comments_sql = "SELECT c.comment_text, u.uname AS author, c.created_at FROM comments c JOIN user u ON c.user_id = u.id WHERE c.story_id = ? ORDER BY c.created_at DESC";
 $comments = [];
 if ($stmt = mysqli_prepare($conn, $comments_sql)) {
@@ -93,16 +95,23 @@ if ($loggedin) {
                         <li><a href="manage-stories.php">My Stories</a></li>
                         <li><a href="story-analytics.php">Story Analytics</a></li>
                         <li><a href="review-submissions.php">Submissions</a></li>
+                        <li><a href="change_password.php">Change Password</a></li>
                         <li><a href="logout.php">Log Out</a></li>
                     </ul>
                 </div>
             <?php else: ?>
                 <a href="login.php">Log In</a>
+                <a href="registration.php">Sign Up</a>
             <?php endif; ?>
         </nav>
     </header>
     <div class="story-container">
         <main class="story-main-content">
+
+            <?php if($successMessage): ?>
+                <div class="success-message"><?php echo $successMessage; ?></div>
+            <?php endif; ?>
+
             <h1 class="story-title"><?php echo htmlspecialchars($story['title']); ?></h1>
             <div class="story-author">by <?php echo htmlspecialchars($story['author_name']); ?></div>
 

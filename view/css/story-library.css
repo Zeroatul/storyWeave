@@ -1,10 +1,9 @@
 body {
-    font-family:  "Segoe UI",  Helvetica, Arial, sans-serif;
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     background-color: #f0f2f5;
     margin: 0;
     color: #333;
 }
-
 .main-header {
     background-color: #ffffff;
     padding: 0 40px;
@@ -17,13 +16,6 @@ body {
     z-index: 1000;
     height: 85px;
 }
-
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: #1c1e21;
-}
-
 .logo a {
     text-decoration: none;
     color: inherit;
@@ -35,28 +27,23 @@ body {
     width: 180px;
     margin-top: 10px;
 }
-
 .main-nav {
     display: flex;
     align-items: center;
 }
-
 .main-nav a {
     text-decoration: none;
     color: #606770;
     margin-left: 25px;
     font-weight: 500;
 }
-
 .main-nav a:hover {
     color: #0c66e4;
 }
-
 .profile-dropdown {
     position: relative;
     margin-left: 25px;
 }
-
 .profile-avatar {
     width: 40px;
     height: 40px;
@@ -70,7 +57,6 @@ body {
     cursor: pointer;
     font-size: 18px;
 }
-
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -86,11 +72,9 @@ body {
     z-index: 1001;
     border: 1px solid #dddfe2;
 }
-
 .profile-dropdown:hover .dropdown-menu {
     display: block;
 }
-
 .dropdown-menu li a {
     display: block;
     padding: 10px 20px;
@@ -99,32 +83,26 @@ body {
     margin-left: 0;
     font-size: 14px;
 }
-
 .dropdown-menu li a:hover {
     background-color: #f0f2f5;
     color: #1c1e21;
 }
-
 .dropdown-menu li {
     border-top: 1px solid #f0f2f5;
 }
-
 .dropdown-menu li:first-child {
     border-top: none;
 }
-
 .library-wrapper {
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px;
 }
-
 .page-title {
     font-size: 36px;
     color: #1c1e21;
     margin-bottom: 30px;
 }
-
 .filter-controls {
     display: flex;
     flex-wrap: wrap;
@@ -134,52 +112,44 @@ body {
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin-bottom: 40px;
+    align-items: flex-end;
 }
-
 .filter-group {
     display: flex;
     flex-direction: column;
 }
-
 .filter-group label {
     font-size: 14px;
     font-weight: 600;
     color: #606770;
     margin-bottom: 8px;
 }
-
 .filter-group select, .filter-group input {
     padding: 10px 15px;
     border: 1px solid #dddfe2;
     border-radius: 6px;
     font-size: 16px;
     background-color: #f5f6f7;
-    height: 42px; /* Set fixed height */
-    box-sizing: border-box;
+    min-width: 180px;
 }
-
-.filter-group .filter-btn {
-    background-color: #0c66e4;
+.filter-button {
+    background-color: #1877f2;
     color: white;
+    padding: 10px 25px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    font-size: 16px;
     font-weight: 600;
-    height: 42px;
-    padding: 10px 20px;
-    margin-top: auto; /* Align button to bottom */
 }
-
-.filter-group .filter-btn:hover {
-    background-color: #0052cc;
+.filter-button:hover {
+    background-color: #166fe5;
 }
-
 .story-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
 }
-
 .story-card {
     background-color: #ffffff;
     border-radius: 12px;
@@ -189,58 +159,48 @@ body {
     flex-direction: column;
     padding: 30px;
 }
-
 .story-card:hover {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
-
 .story-card h3 {
     margin: 0 0 5px 0;
     font-size: 24px;
     color: #1c1e21;
 }
-
 .story-card .author {
     font-size: 15px;
     color: #606770;
     margin-bottom: 20px;
 }
-
 .card-tags {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
 }
-
 .tag {
     padding: 5px 12px;
     border-radius: 15px;
     font-size: 12px;
     font-weight: 600;
 }
-
 .genre-tag {
     background-color: #e7f3ff;
     color: #0c66e4;
 }
-
 .status-in-progress {
     background-color: #fff0e6;
     color: #ff8b3d;
 }
-
 .status-finished {
     background-color: #e6f4ea;
     color: #36b37e;
 }
-
 .story-card p {
     margin: 0 0 25px 0;
     color: #606770;
     line-height: 1.6;
     flex-grow: 1;
 }
-
 .read-now-btn {
     display: block;
     width: 100%;
@@ -254,11 +214,9 @@ body {
     font-size: 16px;
     margin-top: auto;
 }
-
 .read-now-btn:hover {
     background-color: #166fe5;
 }
-
 .main-footer {
     background-color: #ffffff;
     text-align: center;

@@ -14,7 +14,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    height: 85px; /* Consistent height */
+    height: 85px;
 }
 .logo a {
     text-decoration: none;
@@ -24,7 +24,7 @@ body {
 }
 .logo img {
     text-decoration: none;
-    height: 135px; /* Consistent logo size */
+    height: 135px;
     padding-left: 100px;
     width: 180px;
     margin-top: 10px;
@@ -62,7 +62,7 @@ body {
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%; /* Corrected position */
+    top: 100%;
     right: 0;
     background-color: white;
     border-radius: 8px;
@@ -167,11 +167,6 @@ body {
     background-color: #1f9e54;
     cursor: default;
 }
-.btn-rejected {
-    background-color: #606770;
-    color: #fff;
-    cursor: default;
-}
 .btn-secondary {
     background-color: #e9f2ff;
     color: #0c66e4;
@@ -185,5 +180,15 @@ body {
     margin-top: 40px;
     border-top: 1px solid #dddfe2;
     color: #606770;
+}
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    text-align: center;
 }
 
