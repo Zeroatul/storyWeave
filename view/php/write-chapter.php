@@ -8,6 +8,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 }
 
 $story_id = isset($_GET['story_id']) ? (int)$_GET['story_id'] : 0;
+$error = isset($_GET['error']) && $_GET['error'] == 1 ? "All fields are required. Please fill out both the title and content." : "";
 
 if ($story_id <= 0) {
     die("Invalid story ID.");
@@ -78,6 +79,10 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
     <main class="write-chapter-container">
         <h1>Submit Your Version of Chapter <?php echo $next_chapter_number; ?></h1>
         <p>For the story: <em><?php echo htmlspecialchars($story_title); ?></em></p>
+
+        <?php if ($error): ?>
+            <div class="error-message"><?php echo $error; ?></div>
+        <?php endif; ?>
 
         <form action="../../controller/write_chapter_action.php" method="POST">
             <input type="hidden" name="story_id" value="<?php echo $story_id; ?>">

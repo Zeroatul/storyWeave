@@ -72,7 +72,7 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
                         <span class="status-toggle <?php echo ($story['status'] == 'In Progress') ? 'status-in-progress' : 'status-finished'; ?>">
                             <?php echo htmlspecialchars($story['status']); ?>
                         </span>
-                        <a href="review-submissions.php?story_id=<?php echo $story['id']; ?>" class="btn btn-secondary">Submissions</a>
+                        <a href="review-submissions.php?story_id=<?php echo $story['id']; ?>" class="btn btn-secondary">Review Submissions</a>
                         <a href="contributor_management.php?story_id=<?php echo $story['id']; ?>" class="btn btn-secondary">Contributors</a>
                     </div>
                 </div>

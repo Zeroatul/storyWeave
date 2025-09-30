@@ -2,70 +2,67 @@
 session_start();
 require_once '../../model/db_connect.php';
 
-$successMessage = '';
-if (isset($_SESSION['success_message'])) {
-    $successMessage = $_SESSION['success_message'];
-    unset($_SESSION['success_message']);
-}
-
-if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login.php");
     exit;
 }
 
+$first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
+$user_id = $_SESSION['id'];
 $story_id = isset($_GET['story_id']) ? (int)$_GET['story_id'] : 0;
-if ($story_id <= 0) {
-    die("No story selected.");
-}
+$page_title = '';
+$story_title_for_header = '';
+$submissions_by_story = [];
+$success_message = isset($_SESSION['success_message']) ? $_SESSION['success_message'] : '';
+unset($_SESSION['success_message']);
 
-$story_sql = "SELECT title, user_id FROM stories WHERE id = ?";
-$story_info = null;
-if ($stmt = mysqli_prepare($conn, $story_sql)) {
-    mysqli_stmt_bind_param($stmt, "i", $story_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $story_info = mysqli_fetch_assoc($result);
-    mysqli_stmt_close($stmt);
-}
+if ($story_id > 0) {
+    $story_sql = "SELECT title, user_id FROM stories WHERE id = ?";
+    if ($stmt = mysqli_prepare($conn, $story_sql)) {
+        mysqli_stmt_bind_param($stmt, "i", $story_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if ($story = mysqli_fetch_assoc($result)) {
+            if ($story['user_id'] != $user_id) {
+                die("You do not have permission to view these submissions.");
+            }
+            $story_title_for_header = $story['title'];
+            $page_title = "Submissions for " . htmlspecialchars($story_title_for_header);
 
-if (!$story_info || $story_info['user_id'] != $_SESSION['id']) {
-    die("You do not have permission to review submissions for this story.");
-}
-
-$chapters_sql = "SELECT MAX(chapter_number) as max_chapter FROM chapters WHERE story_id = ?";
-$current_chapter = 0;
-if ($stmt = mysqli_prepare($conn, $chapters_sql)) {
-    mysqli_stmt_bind_param($stmt, "i", $story_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    if($row = mysqli_fetch_assoc($result)){
-        $current_chapter = $row['max_chapter'] ?? 0;
+            $submissions_sql = "SELECT sub.id, sub.title, sub.content, sub.status, u.uname as contributor_name, sub.for_chapter_number FROM submissions sub JOIN user u ON sub.user_id = u.id WHERE sub.story_id = ? AND sub.status = 'Pending' ORDER BY sub.submitted_at DESC";
+            if ($sub_stmt = mysqli_prepare($conn, $submissions_sql)) {
+                mysqli_stmt_bind_param($sub_stmt, "i", $story_id);
+                mysqli_stmt_execute($sub_stmt);
+                $sub_result = mysqli_stmt_get_result($sub_stmt);
+                $submissions_by_story[$story_title_for_header] = mysqli_fetch_all($sub_result, MYSQLI_ASSOC);
+                mysqli_stmt_close($sub_stmt);
+            }
+        } else {
+            die("Story not found.");
+        }
+        mysqli_stmt_close($stmt);
     }
-    mysqli_stmt_close($stmt);
-}
-$reviewing_chapter_number = $current_chapter + 1;
-
-$submissions_sql = "SELECT s.id, s.content, s.title, u.uname as author_name FROM submissions s JOIN user u ON s.user_id = u.id WHERE s.story_id = ? AND s.for_chapter_number = ? AND s.status = 'Pending'";
-$submissions = [];
-if ($stmt = mysqli_prepare($conn, $submissions_sql)) {
-    mysqli_stmt_bind_param($stmt, "ii", $story_id, $reviewing_chapter_number);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    while ($row = mysqli_fetch_assoc($result)) {
-        $submissions[] = $row;
+} else {
+    $page_title = "All Pending Submissions";
+    $all_submissions_sql = "SELECT s.title as story_title, sub.id, sub.title, sub.content, sub.status, u.uname as contributor_name, sub.for_chapter_number, sub.story_id FROM submissions sub JOIN stories s ON sub.story_id = s.id JOIN user u ON sub.user_id = u.id WHERE s.user_id = ? AND sub.status = 'Pending' ORDER BY s.title, sub.submitted_at DESC";
+    if ($stmt = mysqli_prepare($conn, $all_submissions_sql)) {
+        mysqli_stmt_bind_param($stmt, "i", $user_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        while ($row = mysqli_fetch_assoc($result)) {
+            $submissions_by_story[$row['story_title']][] = $row;
+        }
+        mysqli_stmt_close($stmt);
     }
-    mysqli_stmt_close($stmt);
 }
 mysqli_close($conn);
-
-$first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0, 1) : '?';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Review Submissions - <?php echo htmlspecialchars($story_info['title']); ?></title>
+    <title><?php echo $page_title; ?> - Story Weave</title>
     <link href="../css/review-submissions.css" rel="stylesheet">
 </head>
 <body>
@@ -93,38 +90,42 @@ $first_initial = !empty($_SESSION["fullName"]) ? substr($_SESSION["fullName"], 0
     </header>
     <main class="review-container">
         <header class="review-header">
-            <h1>Review Submissions for Chapter <?php echo $reviewing_chapter_number; ?></h1>
-            <p>Story: <em><?php echo htmlspecialchars($story_info['title']); ?></em></p>
+            <h1><?php echo $page_title; ?></h1>
         </header>
 
-        <?php if($successMessage): ?>
-            <div class="success-message"><?php echo $successMessage; ?></div>
+        <?php if ($success_message): ?>
+            <div class="success-message"><?php echo htmlspecialchars($success_message); ?></div>
         <?php endif; ?>
 
-        <div class="submissions-grid">
-            <?php if (!empty($submissions)): ?>
-                <?php foreach($submissions as $submission): ?>
-                <article class="submission-card">
-                    <header>
-                        <h3><?php echo htmlspecialchars($submission['title']); ?></h3>
-                        <p>by <?php echo htmlspecialchars($submission['author_name']); ?></p>
-                    </header>
-                    <div class="submission-content">
-                        <p><?php echo nl2br(htmlspecialchars($submission['content'])); ?></p>
+        <?php if (empty($submissions_by_story)): ?>
+            <p style="text-align:center;">There are no pending submissions at this time.</p>
+        <?php else: ?>
+            <?php foreach ($submissions_by_story as $story_title => $submissions): ?>
+                <section class="story-submission-group">
+                    <h2>Submissions for <em><?php echo htmlspecialchars($story_title); ?></em></h2>
+                    <div class="submissions-grid">
+                        <?php foreach ($submissions as $submission): ?>
+                        <article class="submission-card">
+                            <header>
+                                <h3><?php echo htmlspecialchars($submission['title']); ?></h3>
+                                <p class="submission-author">By <?php echo htmlspecialchars($submission['contributor_name']); ?> for Chapter <?php echo $submission['for_chapter_number']; ?></p>
+                            </header>
+                            <div class="submission-content">
+                                <p><?php echo nl2br(htmlspecialchars($submission['content'])); ?></p>
+                            </div>
+                            <footer class="card-footer">
+                                <form action="../../controller/select_winner_action.php" method="POST">
+                                    <input type="hidden" name="submission_id" value="<?php echo $submission['id']; ?>">
+                                    <input type="hidden" name="story_id" value="<?php echo $story_id > 0 ? $story_id : $submission['story_id']; ?>">
+                                    <button type="submit" class="btn">Select as Winner</button>
+                                </form>
+                            </footer>
+                        </article>
+                        <?php endforeach; ?>
                     </div>
-                    <footer class="card-footer">
-                        <form action="../../controller/select_winner_action.php" method="POST">
-                            <input type="hidden" name="submission_id" value="<?php echo $submission['id']; ?>">
-                            <input type="hidden" name="story_id" value="<?php echo $story_id; ?>">
-                            <button type="submit" class="btn btn-secondary">Select as Winner</button>
-                        </form>
-                    </footer>
-                </article>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>There are no pending submissions for this chapter yet.</p>
-            <?php endif; ?>
-        </div>
+                </section>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </main>
     <footer class="main-footer">
         <p>&copy; 2025 Story Weave. All Rights Reserved.</p>
